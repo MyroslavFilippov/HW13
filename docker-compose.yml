@@ -1,0 +1,46 @@
+version: '3'
+services:
+  beanstalkd:
+    image: schickling/beanstalkd
+    container_name: beanstalkd
+    ports:
+      - "11300:11300"
+    volumes:
+      - beanstalkd_data:/data
+    networks:
+      - queue-net
+
+  redis_rdb:
+    image: redis
+    container_name: redis_rdb
+    command: redis-server --save 900 1 --save 300 10 --save 60 10000
+    volumes:
+      - redis_data_rdb:/data
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - "6379:6379"
+    networks:
+      - queue-net
+
+  redis_aof:
+    image: redis
+    container_name: redis_aof
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data_aof:/data
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - "6380:6379"
+    networks:
+      - queue-net
+
+volumes:
+  redis_data_rdb:
+  redis_data_aof:
+  beanstalkd_data:
+
+networks:
+  queue-net:
+
